@@ -19,12 +19,19 @@ namespace CocodriloDog.Core {
         /// </summary>
         /// <returns>The game object</returns>
         public GameObject Get() {
-            GameObject go;
-            if (m_InactiveGOs.Count > 0) {
+            RemoveDestroyedEntries();
+
+            GameObject go = null;
+
+            while (m_InactiveGOs.Count > 0 && go == null) {
                 go = m_InactiveGOs[0];
                 m_InactiveGOs.RemoveAt(0);
-                m_ActiveGOs.Add(go);
-            } else {
+                if (go != null) {
+                    m_ActiveGOs.Add(go);
+                }
+            }
+
+            if (go == null) {
                 go = Instantiate(m_Prefab);
                 //Debug.Log($"Instantiated {go}");
                 m_ActiveGOs.Add(go);
@@ -39,6 +46,11 @@ namespace CocodriloDog.Core {
         /// </summary>
         /// <param name="go">The game object to return</param>
         public void Return(GameObject go) {
+            RemoveDestroyedEntries();
+
+            if (go == null) {
+                return;
+            }
 
             if (!m_ActiveGOs.Contains(go)) {
                 throw new ArgumentException($"GameObject {go} does not belong to this {GetType().Name}");
@@ -70,6 +82,19 @@ namespace CocodriloDog.Core {
         /// </summary>
         [NonSerialized]
         private List<GameObject> m_ActiveGOs = new List<GameObject>();
+
+        private void RemoveDestroyedEntries() {
+            RemoveDestroyedEntries(m_ActiveGOs);
+            RemoveDestroyedEntries(m_InactiveGOs);
+        }
+
+        private static void RemoveDestroyedEntries(List<GameObject> list) {
+            for (int i = list.Count - 1; i >= 0; i--) {
+                if (list[i] == null) {
+                    list.RemoveAt(i);
+                }
+            }
+        }
 
         #endregion
 
