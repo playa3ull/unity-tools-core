@@ -82,6 +82,20 @@ namespace CocodriloDog.Core {
 
 		#region Public Methods
 
+		/// <summary>
+		/// Tries to resolve the referenced <see cref="CompositeObject"/> at runtime without logging when it is missing.
+		/// Prefer this over <see cref="Value"/> when a missing reference is expected and should fall back gracefully.
+		/// </summary>
+		public bool TryGetValue(out T value) {
+			value = null;
+			if (!Application.isPlaying) {
+				return false;
+			}
+			var compositeObject = ReferenceableCompositeObjects.GetById(m_Source, m_Id);
+			value = compositeObject as T;
+			return value != null;
+		}
+
 		public void OnAfterDeserialize() => Initialize();
 
 		public void OnBeforeSerialize() { }
